@@ -52,7 +52,7 @@ func CalculateFloat(a, b float64) {
 	fmt.Printf("Вычитание: %f - %f = %f\n", a, b, a-b)
 }
 
-// Avg 6) Написать программу, которая вычисляет среднее значение трех чисел.
-func Avg(a float64, b float64, c float64) {
-	fmt.Printf("Среднее арифмитическое %f\n", (a+b+c)/3)
+// Average 6) Написать программу, которая вычисляет среднее значение трех чисел.
+func Average(a int, b int, c int) {
+	fmt.Printf("Среднее арифмитическое %f\n", float64(a+b+c)/3)
 }
