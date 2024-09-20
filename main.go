@@ -1,6 +1,7 @@
 package main
 
 import (
+	"PsutiGoLabs/pkg/labs/fifth"
 	"PsutiGoLabs/pkg/labs/first"
 	"PsutiGoLabs/pkg/labs/fourth"
 	"PsutiGoLabs/pkg/labs/second"
@@ -114,8 +115,8 @@ func selectLabsAndTasks() {
 				fmt.Println("Ошибка ввода:", err)
 				return
 			}
-			rectangle := second.Rectangle{Width: width, Height: height}
-			fmt.Printf("Площадь вашего прямоугольника равна = %d\n", second.Square(rectangle))
+			rectangle := second.NewRectangle(width, height)
+			fmt.Printf("Площадь вашего прямоугольника равна = %d\n", rectangle.Area())
 		case 6:
 			var a, b int
 			fmt.Print("Введите два целых числа: ")
@@ -209,6 +210,33 @@ func selectLabsAndTasks() {
 		case 6:
 			var numbers = fourth.IntReverse(FillingArr())
 			fmt.Print(numbers)
+		default:
+			fmt.Println("Неверный номер задания")
+		}
+	case 5:
+		fmt.Print("Введите номер задания (1-6): ")
+		_, err := fmt.Scanln(&taskNumber)
+		if err != nil {
+			fmt.Println("Ошибка ввода:", err)
+			return
+		}
+		switch taskNumber {
+		case 1:
+			person := fifth.NewPerson("Alex", 15)
+			person.String()
+		case 2:
+			person := fifth.NewPerson("Bobi", 55)
+			person.Birthday()
+			person.String()
+		case 4, 5:
+			rect := second.NewRectangle(3, 6)
+			circ := fifth.NewCircle(6)
+			shapes := []fifth.Shape{rect, circ}
+			fifth.PrintArea(shapes)
+		case 6:
+			book := fifth.Book{Title: "Face", Author: "Ivan Face", Year: 1997}
+			fmt.Println(book)
+
 		default:
 			fmt.Println("Неверный номер задания")
 		}

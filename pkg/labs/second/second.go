@@ -35,13 +35,21 @@ func StringLength(str string) int {
 
 // Rectangle 5) Создать структуру Rectangle и реализовать метод для вычисления площади прямоугольника.
 type Rectangle struct {
-	Width  int
-	Height int
+	width  int
+	height int
 }
 
-func Square(rectangle Rectangle) int {
-	if rectangle.Width > 0 && rectangle.Height > 0 {
-		return rectangle.Width * rectangle.Height
+func NewRectangle(width, height int) *Rectangle {
+	return &Rectangle{width, height}
+}
+
+func (rectangle Rectangle) String() string {
+	return fmt.Sprintf("Width: %d Height: %d", rectangle.width, rectangle.height)
+}
+
+func (rectangle *Rectangle) Area() float64 {
+	if rectangle.width > 0 && rectangle.height > 0 {
+		return float64(rectangle.width * rectangle.height)
 	}
 	return 0
 }
