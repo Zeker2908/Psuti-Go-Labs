@@ -177,13 +177,20 @@ func selectLabsAndTasks() {
 			ages := []int{30, 25, 35}
 
 			people := fourth.PeopleMap(names, ages)
-			fourth.PrintPeople(people)
+			fourth.PrintMap(people)
 		case 2:
 			names := []string{"Alice", "Bob", "Charlie"}
 			ages := []int{50, 25, 35}
 			people := fourth.PeopleMap(names, ages)
 			fmt.Println(fourth.AvgAgePeopleMap(people))
-
+		case 3:
+			names := []string{"Alice", "Bob", "Charlie"}
+			ages := []int{50, 25, 35}
+			people := fourth.PeopleMap(names, ages)
+			fourth.PrintMap(people)
+			fourth.DeleteElement(people, "Alice")
+			fmt.Println()
+			fourth.PrintMap(people)
 		default:
 			fmt.Println("Неверный номер задания")
 		}
