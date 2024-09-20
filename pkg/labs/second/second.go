@@ -1,6 +1,9 @@
 package second
 
-import "fmt"
+import (
+	"fmt"
+	"unicode/utf8"
+)
 
 // Parity 1) Написать программу, которая определяет, является ли введенное пользователем число четным или нечетным.
 func Parity(num int) bool {
@@ -27,11 +30,7 @@ func PrintNumbers() {
 
 // StringLength 4) Написать функцию, которая принимает строку и возвращает ее длину.
 func StringLength(str string) int {
-	count := 0
-	for range str {
-		count++
-	}
-	return count
+	return utf8.RuneCountInString(str)
 }
 
 // Rectangle 5) Создать структуру Rectangle и реализовать метод для вычисления площади прямоугольника.
@@ -41,7 +40,10 @@ type Rectangle struct {
 }
 
 func Square(rectangle Rectangle) int {
-	return rectangle.Width * rectangle.Height
+	if rectangle.Width > 0 && rectangle.Height > 0 {
+		return rectangle.Width * rectangle.Height
+	}
+	return 0
 }
 
 // Average 6) Написать функцию, которая принимает два целых числа и возвращает их среднее значение.
