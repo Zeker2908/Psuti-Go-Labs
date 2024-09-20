@@ -223,11 +223,11 @@ func selectLabsAndTasks() {
 		switch taskNumber {
 		case 1:
 			person := fifth.NewPerson("Alex", 15)
-			person.String()
+			fmt.Println(person)
 		case 2:
 			person := fifth.NewPerson("Bobi", 55)
 			person.Birthday()
-			person.String()
+			fmt.Println(person)
 		case 4, 5:
 			rect := second.NewRectangle(3, 6)
 			circ := fifth.NewCircle(6)
