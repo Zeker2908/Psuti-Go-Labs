@@ -1,6 +1,8 @@
 package fourth
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // PeopleMap 1)Написать программу, которая создает карту с именами людей и их возрастами. Добавить нового человека и вывести все записи на экран.
 func PeopleMap(name []string, age []int) map[string]int {
@@ -50,4 +52,22 @@ func AvgSlice(slice []float64) float64 {
 // DeleteElement 3) Написать программу, которая удаляет запись из карты по заданному имени.
 func DeleteElement(mapped map[string]int, key string) {
 	delete(mapped, key)
+}
+
+// Sum 5) Написать программу, которая считывает несколько чисел, введенных пользователем, и выводит их сумму.
+func Sum(numbers ...int) int {
+	var sum int
+	for _, number := range numbers {
+		sum += number
+	}
+	return sum
+}
+
+// IntReverse 6) Написать программу, которая считывает массив целых чисел и выводит их в обратном порядке.
+func IntReverse(ints []int) []int {
+	var reversed []int
+	for i := len(ints) - 1; i > 0; i-- {
+		reversed = append(reversed, ints[i])
+	}
+	return reversed
 }

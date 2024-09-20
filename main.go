@@ -8,6 +8,7 @@ import (
 	"PsutiGoLabs/pkg/labs/third/mathutils"
 	"PsutiGoLabs/pkg/labs/third/stringutils"
 	"fmt"
+	"strings"
 )
 
 func main() {
@@ -191,6 +192,24 @@ func selectLabsAndTasks() {
 			fourth.DeleteElement(people, "Alice")
 			fmt.Println()
 			fourth.PrintMap(people)
+		// 4) Написать программу, которая считывает строку с ввода и выводит её в верхнем регистре.
+		case 4:
+			var str string
+			fmt.Print("Введите строку: ")
+			_, err := fmt.Scanln(&str)
+			if err != nil {
+				fmt.Println("Ошибка ввода:", err)
+				return
+			}
+			str = strings.ToUpper(str)
+			fmt.Println(str)
+		case 5:
+			var numbers = FillingArr()
+			fmt.Printf("Сумма введенных чисел: %d\n", fourth.Sum(numbers...))
+		case 6:
+			var numbers = FillingArr()
+			numbers = fourth.IntReverse(numbers)
+			fmt.Print(numbers)
 		default:
 			fmt.Println("Неверный номер задания")
 		}
@@ -198,4 +217,20 @@ func selectLabsAndTasks() {
 	default:
 		fmt.Println("Неверный номер лабораторной работы")
 	}
+}
+
+func FillingArr() []int {
+	var numbers []int
+	var number int
+
+	fmt.Println("Введите числа (для завершения ввода введите любой символ, не являющийся числом):")
+
+	for {
+		_, err := fmt.Scan(&number)
+		if err != nil {
+			break
+		}
+		numbers = append(numbers, number)
+	}
+	return numbers
 }
