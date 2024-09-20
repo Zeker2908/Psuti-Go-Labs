@@ -63,11 +63,11 @@ func Sum(numbers ...int) int {
 	return sum
 }
 
-// IntReverse 6) Написать программу, которая считывает массив целых чисел и выводит их в обратном порядке.
-func IntReverse(ints []int) []int {
+// IntReverse возвращает новый срез, содержащий элементы исходного среза в обратном порядке.
+func IntReverse(numbers []int) []int {
 	var reversed []int
-	for i := len(ints) - 1; i > 0; i-- {
-		reversed = append(reversed, ints[i])
+	for i := len(numbers) - 1; i >= 0; i-- {
+		reversed = append(reversed, numbers[i])
 	}
 	return reversed
 }

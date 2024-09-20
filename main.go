@@ -207,8 +207,7 @@ func selectLabsAndTasks() {
 			var numbers = FillingArr()
 			fmt.Printf("Сумма введенных чисел: %d\n", fourth.Sum(numbers...))
 		case 6:
-			var numbers = FillingArr()
-			numbers = fourth.IntReverse(numbers)
+			var numbers = fourth.IntReverse(FillingArr())
 			fmt.Print(numbers)
 		default:
 			fmt.Println("Неверный номер задания")
