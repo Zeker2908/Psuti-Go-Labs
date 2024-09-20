@@ -2,6 +2,7 @@ package main
 
 import (
 	"PsutiGoLabs/pkg/labs/first"
+	"PsutiGoLabs/pkg/labs/fourth"
 	"PsutiGoLabs/pkg/labs/second"
 	"PsutiGoLabs/pkg/labs/third"
 	"PsutiGoLabs/pkg/labs/third/mathutils"
@@ -160,10 +161,33 @@ func selectLabsAndTasks() {
 			third.MakeSlice()
 		case 6:
 			fmt.Println(third.FindLongestString("str", "hello world", "Nice", "  "))
+		default:
+			fmt.Println("Неверный номер задания")
+		}
+	case 4:
+		fmt.Print("Введите номер задания (1-6): ")
+		_, err := fmt.Scanln(&taskNumber)
+		if err != nil {
+			fmt.Println("Ошибка ввода:", err)
+			return
+		}
+		switch taskNumber {
+		case 1:
+			names := []string{"Alice", "Bob", "Charlie"}
+			ages := []int{30, 25, 35}
+
+			people := fourth.PeopleMap(names, ages)
+			fourth.PrintPeople(people)
+		case 2:
+			names := []string{"Alice", "Bob", "Charlie"}
+			ages := []int{50, 25, 35}
+			people := fourth.PeopleMap(names, ages)
+			fmt.Println(fourth.AvgAgePeopleMap(people))
 
 		default:
 			fmt.Println("Неверный номер задания")
 		}
+
 	default:
 		fmt.Println("Неверный номер лабораторной работы")
 	}
