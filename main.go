@@ -10,6 +10,7 @@ import (
 	"PsutiGoLabs/pkg/labs/third/mathutils"
 	"PsutiGoLabs/pkg/labs/third/stringutils"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 )
@@ -171,6 +172,129 @@ func handleSixthLab(taskNumber int) {
 		wg.Wait()
 
 		fmt.Println("Все задачи завершены")
+	case 2:
+		var wg sync.WaitGroup
+		ch := make(chan []int)
+		wg.Add(2)
+		go sixth.FibonacciInput(ch, &wg)
+		go sixth.FibonacciOut(ch, &wg)
+		wg.Wait()
+		close(ch)
+	case 3:
+		numbers := make(chan int)
+		results := make(chan string)
+
+		// Запуск горутины для генерации чисел
+		go sixth.GenerateNumbers(numbers)
+
+		// Использование select для управления каналами
+		for {
+			select {
+			case num := <-numbers:
+				fmt.Printf("Генерируемое значение: %d\n", num)
+				// Проверяем чётность сгенерированного числа в отдельной горутине
+				go sixth.CheckEvenOdd(num, results)
+			case result := <-results:
+				fmt.Println(result)
+			}
+		}
+	case 4:
+		var wg sync.WaitGroup
+		var mutex sync.Mutex
+		numGoroutines := scanInt("Введите количество горутин ")
+
+		// Запускаем несколько горутин
+		for i := 0; i < numGoroutines; i++ {
+			wg.Add(1)
+			go sixth.Increment(&wg, &mutex)
+		}
+
+		wg.Wait()
+
+		fmt.Printf("Финальное число: %d\n", sixth.Counter)
+	case 5:
+		requests := make(chan sixth.CalcRequest)
+		var wg sync.WaitGroup
+
+		// Запуск нескольких горутин-калькуляторов
+		for i := 0; i < 5; i++ {
+			wg.Add(1)
+			go sixth.Calculator(&wg, requests)
+		}
+
+		// Пример клиентских запросов
+		go func() {
+			for _, req := range []sixth.CalcRequest{
+				{"+", 10, 5, make(chan float64)},
+				{"-", 20, 4, make(chan float64)},
+				{"*", 6, 3, make(chan float64)},
+				{"/", 15, 3, make(chan float64)},
+				{"/", 15, 0, make(chan float64)}, // Деление на 0
+			} {
+				requests <- req
+				fmt.Printf("Операция: %s, %f %s %f = %f\n", req.Operation, req.A, req.Operation, req.B, <-req.Result)
+			}
+			close(requests) // Закрытие канала запросов после отправки всех
+		}()
+
+		wg.Wait() // Ожидание завершения всех горутин
+	case 6:
+		// Запрос количества воркеров у пользователя
+		numWorkers := scanInt("Введите количество воркеров:")
+
+		// Канал для задач и результатов
+		tasks := make(chan sixth.Task, 10)
+		results := make(chan string, 10)
+
+		// WaitGroup для ожидания завершения всех воркеров
+		var wg sync.WaitGroup
+
+		// Запуск воркеров
+		for i := 1; i <= numWorkers; i++ {
+			wg.Add(1)
+			go sixth.Worker(i, tasks, results, &wg)
+		}
+
+		// Генерация задач
+		go func() {
+			for i := 1; i <= 10; i++ {
+				tasks <- sixth.Task{ID: i, Payload: i * 10} // Пример задачи
+			}
+			close(tasks) // Закрываем канал после отправки всех задач
+		}()
+
+		// Ожидание завершения всех воркеров
+		go func() {
+			wg.Wait()
+			close(results) // Закрываем канал результатов после завершения воркеров
+		}()
+
+		// Открываем файл для записи результатов
+		file, err := os.Create("worker_results.txt")
+		if err != nil {
+			fmt.Println("Ошибка создания файла:", err)
+			return
+		}
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+
+			}
+		}(file)
+
+		// Получение и вывод результатов в файл и консоль
+		for result := range results {
+			fmt.Println(result) // Вывод в консоль
+			_, err := file.WriteString(result + "\n")
+			if err != nil {
+				return
+			} // Запись в файл
+		}
+
+		fmt.Println("Все задачи завершены, результат сохранен в worker_results.txt.")
+
+	default:
+		fmt.Println("Неверный номер задания")
 	}
 
 }
