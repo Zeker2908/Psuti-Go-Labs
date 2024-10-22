@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat</title>
+</head>
+<body>
+<h2>WebSocket Chat</h2>
+
+<div id="chatbox" style="width:500px;height:300px;border:1px solid #000;overflow:auto;"></div>
+<input type="text" id="username" placeholder="Введите ваше имя" /><br/>
+<input type="text" id="message" placeholder="Введите сообщение" />
+<button onclick="sendMessage()">Отправить</button>
+
+<script>
+    // Устанавливаем соединение с веб-сокет сервером
+    var ws = new WebSocket("ws://localhost:8080/ws");
+
+    ws.onmessage = function(event) {
+        var chatbox = document.getElementById("chatbox");
+        var msg = JSON.parse(event.data);
+        chatbox.innerHTML += "<p><b>" + msg.username + "</b>: " + msg.message + "</p>";
+    };
+
+    function sendMessage() {
+        var username = document.getElementById("username").value;
+        var message = document.getElementById("message").value;
+
+        // Отправляем сообщение в формате JSON
+        ws.send(JSON.stringify({
+            username: username,
+            message: message
+        }));
+
+        // Очищаем поле ввода
+        document.getElementById("message").value = '';
+    }
+</script>
+</body>
+</html>

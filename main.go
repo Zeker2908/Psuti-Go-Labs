@@ -5,6 +5,8 @@ import (
 	"PsutiGoLabs/pkg/labs/first"
 	"PsutiGoLabs/pkg/labs/fourth"
 	"PsutiGoLabs/pkg/labs/second"
+	"PsutiGoLabs/pkg/labs/seventh"
+	"PsutiGoLabs/pkg/labs/seventh/websocket"
 	"PsutiGoLabs/pkg/labs/sixth"
 	"PsutiGoLabs/pkg/labs/third"
 	"PsutiGoLabs/pkg/labs/third/mathutils"
@@ -36,6 +38,8 @@ func selectLabsAndTasks() {
 		handleFifthLab(taskNumber)
 	case 6:
 		handleSixthLab(taskNumber)
+	case 7:
+		handleSeventhLab(taskNumber)
 	default:
 		fmt.Println("Неверный номер лабораторной работы")
 	}
@@ -297,6 +301,21 @@ func handleSixthLab(taskNumber int) {
 		fmt.Println("Неверный номер задания")
 	}
 
+}
+
+func handleSeventhLab(taskNumber int) {
+	switch taskNumber {
+	case 1, 2, 3:
+		var wg sync.WaitGroup
+		seventh.TcpServer(&wg)
+	case 4, 5:
+		seventh.HttpServer()
+	case 6:
+		websocket.WebSocketServer()
+	default:
+		fmt.Println("Неверный номер задания")
+
+	}
 }
 
 func FillingArr() []int {
