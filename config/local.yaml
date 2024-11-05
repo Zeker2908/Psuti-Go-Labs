@@ -1,0 +1,12 @@
+env: "local" # Окружение - local, dev или prod
+http_server: # конфигурация нашего http-сервера
+  address: "localhost:8080"
+  timeout: 4s
+  idle_timeout: 30s
+database:
+  user: "leonidas"
+  dbname: "test"
+  sslmode: "disable"
+  password: "leo29082004"
+  host: "localhost"
+  port: "5432"

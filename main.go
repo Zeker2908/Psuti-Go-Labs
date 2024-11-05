@@ -1,6 +1,7 @@
 package main
 
 import (
+	"PsutiGoLabs/pkg/labs/eight/rest"
 	"PsutiGoLabs/pkg/labs/fifth"
 	"PsutiGoLabs/pkg/labs/first"
 	"PsutiGoLabs/pkg/labs/fourth"
@@ -40,6 +41,8 @@ func selectLabsAndTasks() {
 		handleSixthLab(taskNumber)
 	case 7:
 		handleSeventhLab(taskNumber)
+	case 8:
+		handleEightLab(taskNumber)
 	default:
 		fmt.Println("Неверный номер лабораторной работы")
 	}
@@ -81,7 +84,7 @@ func handleSecondLab(taskNumber int) {
 	case 5:
 		width, height := scanTwoInts("Введите ширину и высоту прямоугольника: ")
 		rectangle := second.NewRectangle(width, height)
-		fmt.Printf("Площадь вашего прямоугольника равна = %d\n", rectangle.Area())
+		fmt.Printf("Площадь вашего прямоугольника равна = %f\n", rectangle.Area())
 	case 6:
 		a, b := scanTwoInts("Введите два целых числа: ")
 		fmt.Printf("Среднее арифмитическое = %f\n", second.Average(a, b))
@@ -316,6 +319,10 @@ func handleSeventhLab(taskNumber int) {
 		fmt.Println("Неверный номер задания")
 
 	}
+}
+
+func handleEightLab(taskNumber int) {
+	rest.Start()
 }
 
 func FillingArr() []int {
