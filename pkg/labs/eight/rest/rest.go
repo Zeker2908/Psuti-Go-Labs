@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -31,6 +32,7 @@ type User struct {
 	Name     string `json:"name" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
+	Role     string `json:"role"` // Роль пользователя: "admin" или "user"
 }
 
 var jwtKey = []byte("secret_key") // Этот ключ используется для подписи токенов
@@ -69,8 +71,6 @@ func validateJWT(tokenString string) (*Claims, error) {
 	}
 	return claims, nil
 }
-
-// Регистрация нового пользователя (без токена)
 func registerUser(c *gin.Context) {
 	var user User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -78,8 +78,20 @@ func registerUser(c *gin.Context) {
 		return
 	}
 
-	// Вставить данные нового пользователя с паролем
-	err := db.QueryRow("INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id", user.Name, user.Email, user.Password).Scan(&user.ID)
+	// Назначение роли по умолчанию
+	if user.Role == "" {
+		user.Role = "user"
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка хэширования пароля"})
+		return
+	}
+	user.Password = string(hashedPassword)
+
+	err = db.QueryRow("INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id",
+		user.Name, user.Email, user.Password, user.Role).Scan(&user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -96,10 +108,10 @@ func loginUser(c *gin.Context) {
 		return
 	}
 
-	// Проверить данные пользователя (например, по email и паролю)
+	// Проверить данные пользователя (например, по email)
 	var dbUser User
 	err := db.QueryRow("SELECT id, name, email, password FROM users WHERE email=$1", user.Email).Scan(&dbUser.ID, &dbUser.Name, &dbUser.Email, &dbUser.Password)
-	if err != nil || dbUser.Password != user.Password {
+	if err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(user.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный email или пароль"})
 		return
 	}
@@ -181,12 +193,72 @@ func createTable(db *sql.DB) {
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             email VARCHAR(255) NOT NULL UNIQUE,
-            password VARCHAR(255) NOT NULL
+            password VARCHAR(255) NOT NULL,
+            role VARCHAR(50) NOT NULL DEFAULT 'user'
         );
     `
 	_, err := db.Exec(createTableSQL)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Создаем администратора, если его нет
+	adminExistsQuery := `SELECT COUNT(*) FROM users WHERE email = 'admin@admin.com'`
+	var adminCount int
+	err = db.QueryRow(adminExistsQuery).Scan(&adminCount)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if adminCount == 0 {
+		// Хэшируем пароль администратора
+		adminPassword := "adminpass"
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
+		if err != nil {
+			log.Fatal("Ошибка хэширования пароля администратора:", err)
+		}
+
+		_, err = db.Exec(
+			`INSERT INTO users (name, email, password, role) VALUES ('Admin', 'admin@admin.com', $1, 'admin')`,
+			hashedPassword,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Admin user created: email=admin@admin.com, password=adminpass")
+	}
+}
+
+func authorizeAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString := c.GetHeader("Authorization")
+		if tokenString == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Отсутствует токен авторизации"})
+			c.Abort()
+			return
+		}
+
+		// Убираем "Bearer " из строки токена
+		tokenString = tokenString[len("Bearer "):]
+
+		// Валидация токена
+		claims, err := validateJWT(tokenString)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный токен"})
+			c.Abort()
+			return
+		}
+
+		// Проверяем роль пользователя
+		var role string
+		err = db.QueryRow("SELECT role FROM users WHERE name = $1", claims.Username).Scan(&role)
+		if err != nil || role != "admin" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Доступ запрещен"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
 	}
 }
 
@@ -340,6 +412,14 @@ func updateUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	if user.Password != "" {
+		hashedPassword, err := hashPassword(user.Password)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при хэшировании пароля"})
+			return
+		}
+		user.Password = hashedPassword
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Пользователь обновлен"})
 }
@@ -373,6 +453,18 @@ func deleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Пользователь удален"})
 }
 
+// Хэширование пароля
+func hashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
+}
+
+// Проверка пароля
+func checkPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
 // Основная функция
 func Start() {
 	// Загрузка конфигурации
@@ -396,23 +488,19 @@ func Start() {
 	// Маршрут для входа и получения токена
 	r.POST("/login", loginUser)
 
-	// Защищенные маршруты с токеном
 	protected := r.Group("/", authenticate())
 	{
-		// Получение всех пользователей
-		protected.GET("/users", getUsers)
-
 		// Получение пользователя по ID
 		protected.GET("/users/:id", getUserByID)
 
-		// Создание пользователя
+		// Создание пользователя (доступно всем авторизованным)
 		protected.POST("/users", registerUser)
 
-		// Обновление пользователя
-		protected.PUT("/users/:id", updateUser)
+		// Обновление и удаление доступны только администратору
+		protected.PUT("/users/:id", authorizeAdmin(), updateUser)
+		protected.DELETE("/users/:id", authorizeAdmin(), deleteUser)
+		protected.GET("/users", getUsers)
 
-		// Удаление пользователя
-		protected.DELETE("/users/:id", deleteUser)
 	}
 
 	// Запуск сервера

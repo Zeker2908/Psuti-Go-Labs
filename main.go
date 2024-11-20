@@ -9,6 +9,7 @@ import (
 	"PsutiGoLabs/pkg/labs/seventh"
 	"PsutiGoLabs/pkg/labs/seventh/websocket"
 	"PsutiGoLabs/pkg/labs/sixth"
+	"PsutiGoLabs/pkg/labs/tenth"
 	"PsutiGoLabs/pkg/labs/third"
 	"PsutiGoLabs/pkg/labs/third/mathutils"
 	"PsutiGoLabs/pkg/labs/third/stringutils"
@@ -43,6 +44,8 @@ func selectLabsAndTasks() {
 		handleSeventhLab(taskNumber)
 	case 8:
 		handleEightLab(taskNumber)
+	case 10:
+		handleTenthLab(taskNumber)
 	default:
 		fmt.Println("Неверный номер лабораторной работы")
 	}
@@ -319,6 +322,23 @@ func handleSeventhLab(taskNumber int) {
 		fmt.Println("Неверный номер задания")
 
 	}
+}
+
+func handleTenthLab(taskNumber int) {
+	switch taskNumber {
+	case 1:
+		tenth.First()
+	case 2:
+		tenth.Second()
+	case 3:
+		tenth.Third()
+	case 4:
+		tenth.StartTLS()
+
+	default:
+		fmt.Println("Неверный номер задания")
+	}
+
 }
 
 func handleEightLab(taskNumber int) {
